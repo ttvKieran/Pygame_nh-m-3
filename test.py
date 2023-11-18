@@ -93,20 +93,20 @@ class Enemy:
         pygame.draw.rect(screen, (0, 255, 0), (self.rect.x, self.rect.y - 10, health_bar_width * health_ratio, health_bar_height))
 
 # Đường dẫn đến các hình ảnh
-idle_image_path = 'player_down/down_2.png'
+idle_image_path = 'player_attack/att1.png'
 up_image_paths = ['player_up/up_1.png', 'player_up/up_2.png', 'player_up/up_3.png']
 down_image_paths = ['player_down/down_1.png', 'player_down/down_2.png', 'player_down/down_3.png']
 left_image_paths = ['player_move/left_1.png', 'player_move/left_2.png', 'player_move/left_1.png']
 right_image_paths = ['player_move/right_1.png', 'player_move/right_2.png', 'player_move/right_1.png']
-right_image_attack = 'player_attack/attack_right.png'
-left_image_attack= 'player_attack/attack_left.png'
+right_image_attack = 'player_attack/att1.png'
+left_image_attack= 'player_attack/att.png'
 
 # Initialize the player
 player = Player(100, 100, 5, down_image_paths, max_health=100)
 
 # Initialize an enemy
-enemy = Enemy(700, 700, 2, 'player_down/down_2.png', max_health=50)
-
+enemy = Enemy(700, 700, 2, 'player_down/down_2.png', max_health=50) 
+ 
 screen_size = (1400, 787)
 screen = pygame.display.set_mode(screen_size)
 
@@ -136,7 +136,7 @@ while True:
     print(player.rect.colliderect(enemy.rect))
     if pygame.Rect.colliderect(enemy.rect, player.rect):
         player.health -= 0.1
-        enemy.health -= 0.5
+        enemy.health -= 0.1
     print(player.health, enemy.health)
     # Draw on the screen
     screen.fill((0, 0, 0))
