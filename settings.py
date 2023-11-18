@@ -1,32 +1,62 @@
 import pygame
 pygame.init()
 
+class Player:
+    def __init__(self, x, y, speed, image_paths, max_health):
+        self.rect = pygame.Rect(x, y, 0, 0)
+        self.speed = speed
+        self.image_paths = image_paths
+        self.current_index = 0
+        self.current_image = pygame.image.load(self.image_paths[self.current_index])
+        self.health = max_health
+        self.max_health = max_health
+
+    def update(self, key_presses):
+        self.rect.x += self.speed * (key_presses[pygame.K_RIGHT] - key_presses[pygame.K_LEFT])
+        self.rect.y += self.speed * (key_presses[pygame.K_DOWN] - key_presses[pygame.K_UP])
+
+        if key_presses[pygame.K_UP]:
+            self.image_paths = up_image_paths
+        elif key_presses[pygame.K_DOWN]:
+            self.image_paths = down_image_paths
+        elif key_presses[pygame.K_LEFT]:
+            self.image_paths = left_image_paths
+        elif key_presses[pygame.K_RIGHT]:
+            self.image_paths = right_image_paths
+        else:
+            self.image_paths = [idle_image_path]
+            self.current_index = 0  # Reset current_index when the idle image is selected
+
+    def animate(self):
+        if frame_count >= frame_delay:
+            self.current_index = (self.current_index + 1) % len(self.image_paths)
+            self.current_image = pygame.image.load(self.image_paths[self.current_index])
+            return True  # Animation frame changed
+        return False  # Animation frame not changed
+
+    def draw_health_bar(self):
+        health_bar_width = 50
+        health_ratio = max(0, self.health / self.max_health)
+        health_bar_height = 5
+        pygame.draw.rect(screen, (255, 0, 0), (self.rect.x, self.rect.y - 10, health_bar_width, health_bar_height))
+        pygame.draw.rect(screen, (0, 255, 0), (self.rect.x, self.rect.y - 10, health_bar_width * health_ratio, health_bar_height))
+
+# Đường dẫn đến các hình ảnh
+idle_image_path = 'player_down/down_2.png'
+up_image_paths = ['player_up/up_1.png', 'player_up/up_2.png', 'player_up/up_3.png']
+down_image_paths = ['player_down/down_1.png', 'player_down/down_2.png', 'player_down/down_3.png']
+left_image_paths = ['player_move/left_1.png', 'player_move/left_2.png', 'player_move/left_1.png']
+right_image_paths = ['player_move/right_1.png', 'player_move/right_2.png', 'player_move/right_1.png']
+
+# Initialize the player
+player = Player(100, 100, 5, down_image_paths, max_health=100)
+
 screen_size = (1400, 787)
 screen = pygame.display.set_mode(screen_size)
 
-# Đường dẫn đến các hình ảnh
-idle_image = 'player_down/down_mid.png'
-up_images = ['player_up/up_left.png', 'player_up/up_mid.png', 'player_up/up_right.png']
-down_images = ['player_down/down_left.png', 'player_down/down_mid.png', 'player_down/down_right.png']
-left_images = ['player_move/left_1.png', 'player_move/left_2.png', 'player_move/left_1.png']
-right_images = ['player_move/right_1.png', 'player_move/right_2.png', 'player_move/right_1.png']
-
-# Load tất cả hình ảnh vào pygame
-idle_image = pygame.image.load(idle_image)
-up_images = [pygame.image.load(image) for image in up_images]
-down_images = [pygame.image.load(image) for image in down_images]
-left_images = [pygame.image.load(image) for image in left_images]
-right_images = [pygame.image.load(image) for image in right_images]
-
-# Một số thuộc tính của game
 fps = 60
 frame_count = 0
 frame_delay = 10
-current_index = 0
-current_images = down_images  # Ảnh mặc định
-current_image = current_images[current_index]
-player_rect = current_image.get_rect()
-speed = 5  # Tốc độ của nhân vật
 
 clock = pygame.time.Clock()
 
@@ -39,29 +69,15 @@ while True:
 
     key_presses = pygame.key.get_pressed()
 
-    # Cập nhật vị trí của nhân vật dựa trên sự kiện nhấn phím
-    player_rect.x += speed * (key_presses[pygame.K_RIGHT] - key_presses[pygame.K_LEFT])
-    player_rect.y += speed * (key_presses[pygame.K_DOWN] - key_presses[pygame.K_UP])
-
-    if key_presses[pygame.K_UP]:
-        current_images = up_images
-    elif key_presses[pygame.K_DOWN]:
-        current_images = down_images
-    elif key_presses[pygame.K_LEFT]:
-        current_images = left_images
-    elif key_presses[pygame.K_RIGHT]:
-        current_images = right_images
-    else:
-        current_images = [idle_image]
-        current_index = 0  # Reset current_index khi ảnh idle được chọn
+    player.update(key_presses)
 
     if frame_count >= frame_delay:
-        current_index = (current_index + 1) % len(current_images)
-        current_image = current_images[current_index]
-        frame_count = 0  # Reset frame count
+        if player.animate():
+            frame_count = 0  # Reset frame count
 
     screen.fill((0, 0, 0))
-    screen.blit(current_image, player_rect)
+    player.draw_health_bar()
+    screen.blit(player.current_image, player.rect)
 
     pygame.display.flip()
 
