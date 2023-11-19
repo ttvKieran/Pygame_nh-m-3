@@ -14,8 +14,8 @@ class Player:
         # Thêm các biến mới
         self.is_attacking = False
         self.attack_frame_count = 0
-        self.attack_delay = 20  # Độ trễ giữa các cú đánh
-        self.attack_duration = 5  # Thời gian hiển thị mỗi cú đánh
+        self.attack_delay = 100  # Độ trễ giữa các cú đánh
+        self.attack_duration = 30   # Thời gian hiển thị mỗi cú đánh
 
     def update(self, key_presses):
         self.rect.x += self.speed * (key_presses[pygame.K_RIGHT] - key_presses[pygame.K_LEFT])
@@ -29,31 +29,26 @@ class Player:
             self.is_attacking = False  # Không đánh khi di chuyển xuống
         elif key_presses[pygame.K_LEFT]:
             self.image_paths = left_image_paths
-            self.is_attacking = key_presses[pygame.K_SPACE]  # Đánh khi di chuyển sang trái và nhấn Space
+            self.is_attacking = False  # Không đánh khi di chuyển sang trái
         elif key_presses[pygame.K_RIGHT]:
             self.image_paths = right_image_paths
-            self.is_attacking = key_presses[pygame.K_SPACE]  # Đánh khi di chuyển sang phải và nhấn Space
+            self.is_attacking = False  # Không đánh khi di chuyển sang phải
         else:
             self.image_paths = [idle_image_path]
-            self.current_index = 0  # Reset current_index when the idle image is selected
             self.is_attacking = key_presses[pygame.K_SPACE]  # Đánh khi ở trạng thái đứng yên và nhấn Space
 
-        # Xử lý sự kiện đánh
+        # Xử lý sự kiện đánh   
         if self.is_attacking:
-            self.attack_frame_count += 1
+            self.attack_frame_count += 1 
             if self.attack_frame_count <= self.attack_duration:
-                if self.rect.x < player.rect.x:  
-                    # Đánh bên phải
-                    self.current_image = pygame.image.load(right_image_attack).convert_alpha()
-                else:  # Đánh bên trái
-                    self.current_image = pygame.image.load(left_image_attack).convert_alpha()
+                # Hiển thị animation đánh khi nhấn Space
+                self.current_image = pygame.image.load(image_attack[self.attack_frame_count % len(image_attack)])
             else:
                 # Kết thúc cú đánh, reset các biến liên quan
                 self.is_attacking = False
                 self.attack_frame_count = 0
                 self.current_image = pygame.image.load(self.image_paths[self.current_index]).convert_alpha()
                 self.current_index = 0  # Reset current_index when the idle image is selected
-
     def animate(self):
         if frame_count >= frame_delay:
             # Hiển thị animation bình thường
@@ -98,8 +93,7 @@ up_image_paths = ['player_up/up_1.png', 'player_up/up_2.png', 'player_up/up_3.pn
 down_image_paths = ['player_down/down_1.png', 'player_down/down_2.png', 'player_down/down_3.png']
 left_image_paths = ['player_move/left_1.png', 'player_move/left_2.png', 'player_move/left_1.png']
 right_image_paths = ['player_move/right_1.png', 'player_move/right_2.png', 'player_move/right_1.png']
-right_image_attack = 'player_attack/att1.png'
-left_image_attack= 'player_attack/att.png'
+image_attack = ['player_attack/att1.png','player_attack/att2.png','player_attack/att3.png']
 
 # Initialize the player
 player = Player(100, 100, 5, down_image_paths, max_health=100)
@@ -136,7 +130,7 @@ while True:
     print(player.rect.colliderect(enemy.rect))
     if pygame.Rect.colliderect(enemy.rect, player.rect):
         player.health -= 0.1
-        enemy.health -= 0.1
+        enemy.health -= 0.5
     print(player.health, enemy.health)
     # Draw on the screen
     screen.fill((0, 0, 0))
