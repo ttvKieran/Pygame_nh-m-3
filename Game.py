@@ -36,7 +36,7 @@ bg_musicHome.set_volume(0.4)
 shot_music.set_volume(0.2)
 
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Character Animation")
+pygame.display.set_caption("Ngoi truong xac song")
 clock = pygame.time.Clock()
 
 
