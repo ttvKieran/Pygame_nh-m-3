@@ -18,12 +18,14 @@ class Pathfinder:
 
         finder=AStarFinder(diagonal_movement=DiagonalMovement.always)
         self.path,_=finder.find_path(start,end,self.grid)
+        path_as_tuples=[(node.x,node.y) for node in self.path]
+        print(path_as_tuples)
         self.grid.cleanup()
 
     def get_path(self):
         return self.path
 def get_coord(x,y):
-    col=int(x//49)
+    col=int(x//48)
     row=int(y//49)
     return (col,row)
 matrix1 = [
