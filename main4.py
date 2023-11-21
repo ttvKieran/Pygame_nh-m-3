@@ -4,7 +4,7 @@ import csv
 import os
 import button
 import Zombie_game.Zombie_game as Z
-
+import random
 pygame.init()
 
 screen_width = 1400
@@ -14,6 +14,8 @@ screen_height = 780
 run = True
 level = 1
 start_game = False
+is_win = False
+restart = False
 ROWS = 16
 COLS = 29
 TILE_SIZE = screen_height // ROWS
@@ -22,6 +24,8 @@ scroll = 200
 screen_scroll = 0
 bg_scroll = 0
 isdie = True
+record = 0
+count = 0
 #Display and asset info
 
 bg_musicHome = pygame.mixer.Sound('Sound/cottagecore-17463.mp3')
@@ -36,7 +40,7 @@ bg_musicHome.set_volume(0.4)
 shot_music.set_volume(0.2)
 
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Ngoi truong xac song")
+pygame.display.set_caption("Character Animation")
 clock = pygame.time.Clock()
 
 
@@ -52,6 +56,8 @@ menu_img = pygame.transform.scale(pygame.image.load('asset2/menu.png'), (200, 11
 
 #Background images
 bg_surface = pygame.transform.scale(pygame.image.load('asset2/background13.png'), (1400, 787))
+portal_suface = pygame.transform.scale(pygame.image.load('asset2/portal.png').convert_alpha(), (120, 120))
+portal_rect = portal_suface.get_rect(center = (1328, 608))
 heart_img = pygame.transform.scale(pygame.image.load('asset2/green.png'), (30, 60))
 heart_rect = heart_img.get_rect(center = (25, 28))
 bg_img = pygame.transform.scale(pygame.image.load('asset2/background11.png'), (1400, 787))
@@ -66,8 +72,11 @@ for x in range(TILE_TYPES):
 # def draw_text(text, font, text_col, x, y):
 #     img = font.render(text, True, text_col)
 #     screen.blit(img, (x, y))
+custom_font_48 = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 48)
+custom_font_24 = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 24)
 
-
+win_text = custom_font_48.render('YOU WIN!', False, 'White').convert_alpha()
+win_rect = win_text.get_rect(center=(screen_width*0.5, screen_height*0.2))
 #define player action variables
 moving_left = False
 moving_right = False
@@ -79,13 +88,19 @@ def draw_bg():
     screen.fill('#89A477')
     screen.blit(bg_surface, (0, 0))
     screen.blit(heart_img, heart_rect)
-    
+    if is_win:
+        screen.blit(portal_suface, portal_rect)
 def reset_level():
     data = []
     for row in range(ROWS + 1):
         r = [-1] * COLS
         data.append(r)
     return data
+
+def displayScore():
+    score_surface = custom_font_48.render(f'KILLS: {count}', False, "White")
+    score_rect = score_surface.get_rect(topright=(screen_width - 30, 10))
+    screen.blit(score_surface, score_rect)
 
 class Character(pygame.sprite.Sprite):
     def __init__(self, char, x, y, scale, speed):
@@ -245,13 +260,18 @@ menu_button = button.Button(screen_width // 2 - 100, screen_height // 2 - 300, m
 #Create objects
 world = World()
 player = world.process_data(world_data)
-enemy1 = Z.Enemy(161, 173, 75, 75, 'Zombies/Baby Zombie.png', 3, 5)
-enemy2 = Z.Enemy(1292, 121, 75, 75, 'Zombies/Boy Zombie.png', 3, 5)
-enemy3 = Z.Enemy(1306, 611, 75, 75, 'Zombies/Baby Zombie.png', 3, 5)
-# enemy = Z.Enemy(600, 370, 75, 75, 'Zombies/Bald Zombie.png', 2, 5)
-# enemy = Z.Enemy(600, 370, 75, 75, 'Zombies/Baby Zombie.png', 2, 5)
+# enemy1 = Z.Enemy(161, 173, 75, 75, 'Zombies/Baby Zombie.png', 3, 5)
+# enemy2 = Z.Enemy(1292, 121, 75, 75, 'Zombies/Boy Zombie.png', 3, 5)
+# enemy3 = Z.Enemy(1306, 611, 75, 75, 'Zombies/Baby Zombie.png', 3, 5)
+times=0
+delay = 10000
+enemy=Z.Enemy(161,173,75,75,f'Zombies/{random.randint(1,4)}_Zombie.png',4,5)
+enemy=Z.Enemy(1292, 121, 80, 80, f'Zombies/{random.randint(1,4)}_Zombie.png', 3, 4)    
+enemy=Z.Enemy(1306, 611, 60, 60, f'Zombies/{random.randint(1,4)}_Zombie.png', 4, 2) 
+start_ticks=pygame.time.get_ticks()
+    
 target=Z.Object(0,0,50,50,pygame.image.load("player_bullet/tam.png"))
-health_bar = HealthBar(10, 10, player.health, player.health)
+health_bar = HealthBar(40, 20, player.health, player.health)
 bullets = []
 
 def shoot():
@@ -266,8 +286,34 @@ def shoot():
 
 while run:
     clock.tick(60)
-    
+    current_ticks = pygame.time.get_ticks()
+    if current_ticks-start_ticks>=delay and times < 5:
+        enemy=Z.Enemy(161,173,75,75,f'Zombies/{random.randint(1,4)}_Zombie.png',4,5)
+        enemy=Z.Enemy(1292, 121, 80, 80, f'Zombies/{random.randint(1,4)}_Zombie.png', 3, 4)    
+        enemy=Z.Enemy(1306, 611, 60, 60, f'Zombies/{random.randint(1,4)}_Zombie.png', 4, 4) 
+        enemy=Z.Enemy(75, 611, 60, 60, f'Zombies/{random.randint(1,4)}_Zombie.png', 3, 4) 
+
+        times+=1
+        start_ticks=current_ticks
+    elif current_ticks-start_ticks>=delay and times < 8:
+        enemy=Z.Enemy(161,173,75,75,f'Zombies/{random.randint(1,4)}_Zombie.png',4,5)
+        enemy=Z.Enemy(1292, 121, 80, 80, f'Zombies/{random.randint(1,4)}_Zombie.png', 4, 4)    
+        enemy=Z.Enemy(1306, 611, 60, 60, f'Zombies/{random.randint(1,4)}_Zombie.png', 3, 4) 
+        enemy=Z.Enemy(75, 611, 60, 60, f'Zombies/{random.randint(1,4)}_Zombie.png', 4, 4) 
+        enemy=Z.Enemy(780, 693, 60, 60, f'Zombies/{random.randint(1,4)}_Zombie.png', 4, 4)
+        times+=1
+        start_ticks=current_ticks
+    elif current_ticks-start_ticks>=delay and times == 8:
+        enemy=Z.Enemy(161,173,100,100,f'Zombies/5_Zombie.png', 2, 25)
+        enemy=Z.Enemy(1306,611,120,120,f'Zombies/6_Zombie.png',2, 30)
+        enemy=Z.Enemy(1292, 121, 80, 80, f'Zombies/{random.randint(1,4)}_Zombie.png', 4, 4)    
+        enemy=Z.Enemy(75, 611, 60, 60, f'Zombies/{random.randint(1,4)}_Zombie.png', 3, 2) 
+        enemy=Z.Enemy(780, 693, 60, 60, f'Zombies/{random.randint(1,4)}_Zombie.png', 3, 2) 
+        times += 1
+    if len(Z.enemies)==0 and times == 9:
+        is_win = True
     if start_game == False:
+        pygame.mouse.set_visible(True)
         bg_music.stop()
         bg_musicHome.play(loops = -1, fade_ms = 5)
         screen.blit(bg_img, (0, 0))
@@ -277,15 +323,41 @@ while run:
             start_game = True
         if exit_button.draw(screen):
             run = False
+            
+    elif is_win and player.rect.colliderect(portal_rect):
+            screen.fill('Black')
+            screen.blit(win_text, win_rect)
+            if restart:
+                player.alive = True
+                player.health = 100
+                world_data = reset_level()
+                player.health = 100
+                #restart map
+                with open(f'level{level}_data.csv', newline='') as csvfile:
+                    reader = csv.reader(csvfile, delimiter=',')
+                    for x, row in enumerate(reader):
+                        for y, tile in enumerate(row):
+                            world_data[x][y] = int(tile)
+                world = World()
+                player = world.process_data(world_data)
+                start_game = False
+                is_win = False
+                count = 0
+                times = 0
+                len(Z.enemies)==0 
+    
     else:
+        
         if player.alive:
             pygame.mouse.set_visible(False)
+              
         bg_music.play(loops = -1, fade_ms = 3)  
         world.draw()
         draw_bg()
         health_bar.draw(player.health)
         player.update()
         player.draw()
+        displayScore()
         for obj in Z.objects:
             if (type(obj)==Z.Enemy):
                 obj.update(player)
@@ -293,13 +365,14 @@ while run:
                 obj.update()
         for e in Z.enemies:
             if pygame.Rect.colliderect(e.image_rect,player.rect)==True:
-                player.health-=1
+                player.health-=0.5
                 if player.health<=0:
                     player.alive=False
                 continue      
             for b in bullets:
                if pygame.Rect.colliderect(e.image_rect,b.image_rect)==True:
-                    e.take_damage(1)
+                    if(e.take_damage(1)):
+                        count += 1
                     bullets.remove(b)
                     Z.objects.remove(b)     
         for p in Z.particles:
@@ -349,6 +422,9 @@ while run:
                             world_data[x][y] = int(tile)
                 world = World()
                 player = world.process_data(world_data)
+                times = 0
+                count = 0
+                
             #button menu
             if menu_button.draw(screen):
                 player.alive = True
@@ -364,6 +440,7 @@ while run:
                 world = World()
                 player = world.process_data(world_data)
                 start_game = False  #Go to menu
+                count = times = 0
                 
         mousePos=pygame.mouse.get_pos()
         target.x=mousePos[0]-target.width//2
@@ -376,34 +453,37 @@ while run:
         if event.type == pygame.QUIT:
             run = False
         if player.alive:
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN:            
                 bg_music.stop()
                 shot_music.play()
                 bg_music.play(loops = -1, fade_ms = 5)
                 shoot()
+        
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_a:
                 moving_left = True
-            if event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_d:
                 moving_right = True
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_w:
                 moving_up = True
-            if event.key == pygame.K_DOWN:
+            if event.key == pygame.K_s:
                 moving_down = True
+            if event.key == pygame.K_SPACE:
+                restart = True
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_a:
                 moving_left = False
-            if event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_d:
                 moving_right = False
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_w:
                 moving_up = False
-            if event.key == pygame.K_DOWN:
+            if event.key == pygame.K_s:
                 moving_down = False
             if event.key == pygame.K_ESCAPE:
                 run = False
+        
     #draw_text('Press SPACE to pause', font, 'White', 100, 250)
     pygame.display.update()
-    
     
 pygame.quit()
 sys.exit()
